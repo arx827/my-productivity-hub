@@ -1,9 +1,13 @@
+
+import Layout from '@/layouts/Layout';
+
 function App() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-4xl font-bold text-blue-600">Hello Tailwind CSS!</h1>
-    </div>
-  )
+    <Layout>
+      <h1 className="text-2xl font-bold text-gray-900">歡迎來到 Productivity Hub!</h1>
+      <p className="mt-2 text-gray-600">開始您的生產力之旅。</p>
+    </Layout>
+  );
 }
 
-export default App
+export default App;

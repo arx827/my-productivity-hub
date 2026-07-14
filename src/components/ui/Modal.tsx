@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
-import Button from '@/components/Button';
+import Button from '@/components/ui/Button';
 
 interface ModalProps {
   isOpen: boolean;
