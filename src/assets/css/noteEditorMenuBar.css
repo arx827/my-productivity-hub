@@ -1,0 +1,42 @@
+/* 編輯器 */
+.ProseMirror {
+  min-height: 10rem;
+  outline: none;
+}
+
+.ProseMirror p {
+  margin: 0 0 0.75rem;
+}
+
+.ProseMirror p:last-child {
+  margin-bottom: 0;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+}
+
+/* MenuBar 樣式 */
+.control-group {
+  button {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    margin-right: 5px;
+    cursor: pointer;
+    border-radius: 3px;
+
+    &:hover {
+      background-color: #e0e0e0;
+    }
+
+    &.is-active {
+      background-color: #d0d0d0;
+      border-color: #999;
+    }
+  }
+}
