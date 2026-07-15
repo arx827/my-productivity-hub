@@ -2,54 +2,71 @@ import React, { useState, useEffect, useMemo } from 'react';
 import PageHeader from '@/components/PageHeader';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
-import TaskForm from '../components/TaskForm'; // 引入 TaskForm
-import type { Task } from 'src/types/task';
+import TaskForm from '@/components/TaskForm'; // 引入 TaskForm
+import type { Task } from '@/types/task';
 import { v4 as uuidv4 } from 'uuid'; // 用於生成唯一 ID
+import axios from 'axios'; // 引入 axios
+
+const API_BASE_URL = 'http://localhost:3001'; // JSON Server 的基礎 URL
 
 const TasksPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<Task['status'] | 'all'>('all'); // 新增篩選狀態
+  const [searchTerm, setSearchTerm] = useState(''); // 新增搜尋關鍵字
+  const [sortBy, setSortBy] = useState<'dueDate' | 'priority' | 'createdAt'>('createdAt'); // 新增排序依據
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc'); // 新增排序順序
+
+  // 從 API 獲取任務列表
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get<Task[]>(`${API_BASE_URL}/tasks`);
+      setTasks(response.data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
 
   // 模擬從後端獲取任務列表
   useEffect(() => {
-    // 在實際應用中，這裡會發送 API 請求
-    const fetchedTasks: Task[] = [
-      {
-        id: '1',
-        title: '完成 React 教學文件',
-        description: '撰寫 React 從零到深入的教學文件，包含專案實作。',
-        status: 'in-progress',
-        priority: 'high',
-        dueDate: '2026-07-31',
-        createdAt: '2026-07-01T10:00:00Z',
-        updatedAt: '2026-07-28T15:30:00Z',
-      },
-      {
-        id: '2',
-        title: '規劃面試作品集專案', 
-        description: '設計個人化任務與效能追蹤系統的架構和功能。',
-        status: 'completed',
-        priority: 'high',
-        dueDate: '2026-07-20',
-        createdAt: '2026-06-25T09:00:00Z',
-        updatedAt: '2026-07-20T11:00:00Z',
-      },
-      {
-        id: '3',
-        title: '學習 Tailwind CSS', 
-        description: '熟悉 Tailwind CSS 的實用工具類別和響應式設計。',
-        status: 'todo',
-        priority: 'medium',
-        dueDate: '2026-08-05',
-        createdAt: '2026-07-10T14:00:00Z',
-        updatedAt: '2026-07-10T14:00:00Z',
-      },
-    ];
-    setTasks(fetchedTasks);
+    fetchTasks();
   }, []);
+
+  // 過濾和排序任務列表
+  const filteredAndSortedTasks = useMemo(() => {
+    let filtered = tasks;
+
+    // 狀態篩選
+    if (filterStatus !== 'all') {
+      filtered = filtered.filter(task => task.status === filterStatus);
+    }
+
+    // 搜尋
+    if (searchTerm) {
+      filtered = filtered.filter(task => 
+        task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // 排序
+    return filtered.sort((a, b) => {
+      let compareValue = 0;
+      if (sortBy === 'dueDate' && a.dueDate && b.dueDate) {
+        compareValue = new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      } else if (sortBy === 'priority') {
+        const priorityOrder = { 'low': 1, 'medium': 2, 'high': 3 };
+        compareValue = priorityOrder[a.priority] - priorityOrder[b.priority];
+      } else if (sortBy === 'createdAt') {
+        compareValue = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      }
+      return sortOrder === 'asc' ? compareValue : -compareValue;
+    });
+  }, [tasks, filterStatus, searchTerm, sortBy, sortOrder]);
 
   const handleAddTask = () => {
   setCurrentTask(null);
@@ -66,48 +83,64 @@ const TasksPage: React.FC = () => {
     setIsConfirmModalOpen(true);
   };
 
-  const confirmDeleteTask = (id: string) => {
-    setTasks(tasks.filter(task => task.id !== id));
-    setIsConfirmModalOpen(false);
+  const confirmDeleteTask = async (id: string) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/tasks/${id}`);
+      setTasks(tasks.filter(task => task.id !== id));
+      setIsConfirmModalOpen(false);
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
   }
 
-  const handleSubmitTaskForm = (data: { title: string; description?: string; priority: 'low' | 'medium' | 'high'; dueDate?: string; }) => {
+  const handleSubmitTaskForm = async (data: { title: string; description?: string; priority: 'low' | 'medium' | 'high'; dueDate?: string; }) => {
     const now = new Date().toISOString();
-    if (currentTask) {
-      setTasks(tasks.map(task => 
-        task.id === currentTask.id
-          ? { 
-              ...task, 
-              title: data.title, 
-              description: data.description, 
-              priority: data.priority, 
-              dueDate: data.dueDate, 
-              updatedAt: now 
-            }
-          : task
-      ));
-    } else {
-      const newTask: Task = {
-        id: uuidv4(),
-        title: data.title,
-        description: data.description,
-        status: 'todo',
-        priority: data.priority,
-        dueDate: data.dueDate,
-        createdAt: now,
-        updatedAt: now,
-      };
-      setTasks([...tasks, newTask]);
+    try {
+      if (currentTask) {
+        // 更新現有任務
+        const updatedTask = {
+          ...currentTask,
+          title: data.title,
+          description: data.description,
+          priority: data.priority,
+          dueDate: data.dueDate,
+          updatedAt: now,
+        };
+        await axios.put(`${API_BASE_URL}/tasks/${currentTask.id}`, updatedTask);
+        setTasks(tasks.map(task => task.id === currentTask.id ? updatedTask : task));
+      } else {
+        const newTask: Task = {
+          id: uuidv4(),
+          title: data.title,
+          description: data.description,
+          status: 'todo',
+          priority: data.priority,
+          dueDate: data.dueDate,
+          createdAt: now,
+          updatedAt: now,
+        };
+        const response = await axios.post<Task>(`${API_BASE_URL}/tasks`, newTask);
+        setTasks([...tasks, response.data]);
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error submitting task:', error);
     }
-    setIsModalOpen(false);
   };
 
-  const handleToggleStatus = (id: string) => {
-    setTasks(tasks.map(task => 
-      task.id === id 
-        ? { ...task, status: task.status === 'completed' ? 'todo' : 'completed', updatedAt: new Date().toISOString() }
-        : task
-    ));
+  const handleToggleStatus = async (id: string) => {
+    const taskToUpdate = tasks.find(task => task.id === id);
+    if (!taskToUpdate) return;
+
+    const newStatus = taskToUpdate.status === 'completed' ? 'todo' : 'completed';
+    const updatedTask: Task = { ...taskToUpdate, status: newStatus, updatedAt: new Date().toISOString() };
+
+    try {
+      await axios.patch(`${API_BASE_URL}/tasks/${id}`, { status: newStatus, updatedAt: updatedTask.updatedAt });
+      setTasks(tasks.map(task => task.id === id ? updatedTask : task));
+    } catch (error) {
+      console.error('Error toggling task status:', error);
+    }
   };
 
   const getPriorityBadge = (priority: 'low' | 'medium' | 'high') => {
@@ -129,7 +162,43 @@ const TasksPage: React.FC = () => {
   return (
     <div>
       <PageHeader title="任務" description="管理您的所有任務。" />
-      <div className="flex justify-end mb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 space-y-2 sm:space-y-0">
+        <div className="flex space-x-2 item-center">
+          <Input 
+            id="searchTasks" 
+            placeholder="搜尋任務..." 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full sm:w-auto"
+          />
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value as 'all' | 'todo' | 'in-progress' | 'completed')}
+            className="block w-full sm:w-auto pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
+          >
+            <option value="all">所有狀態</option>
+            <option value="todo">待辦</option>
+            <option value="in-progress">進行中</option>
+            <option value="completed">已完成</option>
+          </select>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'dueDate' | 'priority' | 'createdAt')}
+            className="block w-full sm:w-auto pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
+          >
+            <option value="createdAt">建立日期</option>
+            <option value="dueDate">截止日期</option>
+            <option value="priority">優先級</option>
+          </select>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+            className="block w-full sm:w-auto pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
+          >
+            <option value="desc">降序</option>
+            <option value="asc">升序</option>
+          </select>
+        </div>
         <Button onClick={handleAddTask}>新增任務</Button>
       </div>
       <Card>
@@ -145,7 +214,7 @@ const TasksPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {tasks.map((task) => (
+              {filteredAndSortedTasks.map((task) => (
                 <tr key={task.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     <input 

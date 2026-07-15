@@ -1,0 +1,34 @@
+{
+  "tasks": [
+    {
+      "id": "1",
+      "title": "完成 React 教學文件",
+      "description": "撰寫 React 從零到深入的教學文件，包含專案實作。",
+      "status": "in-progress",
+      "priority": "high",
+      "dueDate": "2026-07-31",
+      "createdAt": "2026-07-01T10:00:00Z",
+      "updatedAt": "2026-07-28T15:30:00Z"
+    },
+    {
+      "id": "2",
+      "title": "規劃面試作品集專案",
+      "description": "設計個人化任務與效能追蹤系統的架構和功能。",
+      "status": "completed",
+      "priority": "high",
+      "dueDate": "2026-07-20",
+      "createdAt": "2026-06-25T09:00:00Z",
+      "updatedAt": "2026-07-20T11:00:00Z"
+    },
+    {
+      "id": "3",
+      "title": "學習 Tailwind CSS",
+      "description": "熟悉 Tailwind CSS 的實用工具類別和響應式設計。",
+      "status": "todo",
+      "priority": "medium",
+      "dueDate": "2026-08-05",
+      "createdAt": "2026-07-10T14:00:00Z",
+      "updatedAt": "2026-07-10T14:00:00Z"
+    }
+  ]
+}
