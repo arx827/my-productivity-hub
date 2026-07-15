@@ -1,21 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PageHeader from '@/components/PageHeader';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
+import TaskForm from '../components/TaskForm'; // 引入 TaskForm
 import type { Task } from 'src/types/task';
 import { v4 as uuidv4 } from 'uuid'; // 用於生成唯一 ID
 
 const TasksPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskDescription, setNewTaskDescription] = useState('');
-  const [newTaskPriority, setNewTaskPriority] = useState<Task['priority']>('medium');
-  const [newTaskDueDate, setNewTaskDueDate] = useState('');
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   // 模擬從後端獲取任務列表
   useEffect(() => {
@@ -57,19 +53,11 @@ const TasksPage: React.FC = () => {
 
   const handleAddTask = () => {
   setCurrentTask(null);
-  setNewTaskTitle('');
-  setNewTaskDescription('');
-  setNewTaskPriority('medium');
-  setNewTaskDueDate('');
   setIsModalOpen(true);
 };
 
   const handleEditTask = (task: Task) => {
     setCurrentTask(task);
-    setNewTaskTitle(task.title);
-    setNewTaskDescription(task.description || '');
-    setNewTaskPriority(task.priority);
-    setNewTaskDueDate(task.dueDate || '');
     setIsModalOpen(true);
   };
 
@@ -83,33 +71,29 @@ const TasksPage: React.FC = () => {
     setIsConfirmModalOpen(false);
   }
 
-  const handleSubmitTask = () => {
-    if (!newTaskTitle.trim()) return;
-
+  const handleSubmitTaskForm = (data: { title: string; description?: string; priority: 'low' | 'medium' | 'high'; dueDate?: string; }) => {
     const now = new Date().toISOString();
     if (currentTask) {
-      // 更新現有任務
       setTasks(tasks.map(task => 
         task.id === currentTask.id
           ? { 
               ...task, 
-              title: newTaskTitle, 
-              description: newTaskDescription, 
-              priority: newTaskPriority, 
-              dueDate: newTaskDueDate, 
+              title: data.title, 
+              description: data.description, 
+              priority: data.priority, 
+              dueDate: data.dueDate, 
               updatedAt: now 
             }
           : task
       ));
     } else {
-      // 新增任務
       const newTask: Task = {
         id: uuidv4(),
-        title: newTaskTitle,
-        description: newTaskDescription,
+        title: data.title,
+        description: data.description,
         status: 'todo',
-        priority: newTaskPriority,
-        dueDate: newTaskDueDate,
+        priority: data.priority,
+        dueDate: data.dueDate,
         createdAt: now,
         updatedAt: now,
       };
@@ -187,45 +171,11 @@ const TasksPage: React.FC = () => {
       </Card>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={currentTask ? '編輯任務' : '新增任務'}>
-        <div className="space-y-4">
-          <Input
-            id="taskTitle"
-            label="任務標題"
-            value={newTaskTitle}
-            onChange={(e) => setNewTaskTitle(e.target.value)}
-            placeholder="輸入任務標題"
-          />
-          <Input
-            id="taskDescription"
-            label="任務描述"
-            value={newTaskDescription}
-            onChange={(e) => setNewTaskDescription(e.target.value)}
-            placeholder="輸入任務描述 (可選)"
-          />
-          <div>
-            <label htmlFor="taskPriority" className="block text-sm font-medium text-gray-700 mb-1">優先級</label>
-            <select
-              id="taskPriority"
-              value={newTaskPriority}
-              onChange={(e) => setNewTaskPriority(e.target.value as 'low' | 'medium' | 'high')}
-              className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
-            >
-              <option value="low">低</option>
-              <option value="medium">中</option>
-              <option value="high">高</option>
-            </select>
-          </div>
-          <Input
-            id="taskDueDate"
-            label="截止日期"
-            type="date"
-            value={newTaskDueDate}
-            onChange={(e) => setNewTaskDueDate(e.target.value)}
-          />
-          <Button onClick={handleSubmitTask} className="w-full">
-            {currentTask ? '更新任務' : '建立任務'}
-          </Button>
-        </div>
+        <TaskForm 
+          onSubmit={handleSubmitTaskForm} 
+          defaultValues={currentTask || undefined} 
+          onCancel={() => setIsModalOpen(false)}
+        />
       </Modal>
 
       {/* 刪除確認 Modal */}
