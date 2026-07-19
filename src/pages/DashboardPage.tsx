@@ -7,6 +7,7 @@ import { useNotes } from '@/context/NotesContext';
 import type { Task } from '@/types/task';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import TaskCompletionChart from '@/components/TaskCompletionChart'; // 引入圖表組件
 
 const API_BASE_URL = 'http://localhost:3001';
 
@@ -106,7 +107,7 @@ const DashboardPage: React.FC = () => {
         {/* 生產力統計數據 (Placeholder) */}
         <Card>
           <h2 className="text-xl font-semibold mb-4">生產力統計</h2>
-          <p className="text-gray-500">這裡將顯示生產力趨勢圖表和統計數據。</p>
+          <TaskCompletionChart tasks={tasks} />
           <p className="mt-2">已完成番茄鐘循環總數: {completedPomodoroCycles}</p>
           {/* 未來將在此處添加圖表組件 */}
         </Card>

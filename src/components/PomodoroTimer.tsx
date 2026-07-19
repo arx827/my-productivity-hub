@@ -28,7 +28,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
   }, [workDuration]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    let interval: ReturnType<typeof setInterval> | null = null;
 
     if (isRunning && timeRemaining > 0) {
       interval = setInterval(() => {
@@ -36,7 +36,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
       }, 1000);
     } else if (isRunning && timeRemaining === 0) {
       // 時間到
-      clearInterval(Number(interval));
+      if (interval) clearInterval(interval);
       if (isWorkTime) {
         // 工作時間結束，進入休息時間
         const newCycleCount = cycleCount + 1;
@@ -62,7 +62,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({
     }
     return () => {
       if (interval) {
-        clearInterval(Number(interval));
+        clearInterval(interval);
       }
     };
   }, [isRunning, timeRemaining, isWorkTime, cycleCount, workDuration, breakDuration, longBreakDuration, cyclesBeforeLongBreak, onCycleComplete]);
