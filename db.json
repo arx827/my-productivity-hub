@@ -14,11 +14,11 @@
       "id": "2",
       "title": "規劃面試作品集專案",
       "description": "設計個人化任務與效能追蹤系統的架構和功能。",
-      "status": "completed",
+      "status": "todo",
       "priority": "high",
       "dueDate": "2026-07-20",
       "createdAt": "2026-06-25T09:00:00Z",
-      "updatedAt": "2026-07-20T11:00:00Z"
+      "updatedAt": "2026-07-18T21:39:26.434Z"
     },
     {
       "id": "3",
