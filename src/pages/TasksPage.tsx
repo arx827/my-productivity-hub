@@ -8,6 +8,8 @@ import TaskForm from '@/components/TaskForm'; // 引入 TaskForm
 import type { Task } from '@/types/task';
 import { v4 as uuidv4 } from 'uuid'; // 用於生成唯一 ID
 import axios from 'axios'; // 引入 axios
+import LoadingSpinner from '@/components/LoadingSpinner'; // 引入 LoadingSpinner
+import toast from 'react-hot-toast';
 
 const API_BASE_URL = 'http://localhost:3001'; // JSON Server 的基礎 URL
 
@@ -21,18 +23,24 @@ const TasksPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'dueDate' | 'priority' | 'createdAt'>('createdAt'); // 新增排序依據
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc'); // 新增排序順序
 
-  // 從 API 獲取任務列表
-  const fetchTasks = async () => {
-    try {
-      const response = await axios.get<Task[]>(`${API_BASE_URL}/tasks`);
-      setTasks(response.data);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-    }
-  };
+  const [isLoading, setIsLoading] = useState(true);
 
   // 模擬從後端獲取任務列表
   useEffect(() => {
+    // 從 API 獲取任務列表
+    const fetchTasks = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get<Task[]>(`${API_BASE_URL}/tasks`);
+        toast.success('操作成功！');
+        setTasks(response.data);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+        toast.error('操作失敗，請稍後再試。');
+      } finally {
+        setIsLoading(false);
+      }
+    };
     fetchTasks();
   }, []);
 
@@ -158,6 +166,10 @@ const TasksPage: React.FC = () => {
       case 'completed': return <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">已完成</span>;
     }
   };
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div>

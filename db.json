@@ -40,5 +40,55 @@
       "updatedAt": "2026-07-15T18:59:33.702Z"
     }
   ],
+  "login": [
+    {
+      "email": "aaa@gmail.com",
+      "password": "yji3vm06",
+      "id": "AD2y4XTPwIA"
+    },
+    {
+      "email": "aaa@gmail.com",
+      "password": "yji3vm06",
+      "id": "2nBtgvnamro"
+    },
+    {
+      "email": "aaa@gmail.com",
+      "password": "123456",
+      "id": "yTdYifmLB0M"
+    },
+    {
+      "email": "aaa@gmail.com",
+      "password": "123456",
+      "id": "vstLXBM66Ow"
+    },
+    {
+      "email": "aaa@gmail.com",
+      "password": "123456",
+      "id": "pfxuzlJsEPY"
+    },
+    {
+      "email": "aaa@gmail.com",
+      "password": "123456",
+      "id": "1SPbKLg_gU0"
+    },
+    {
+      "email": "fuboneason@gmail.com",
+      "password": "123456",
+      "id": "cno70F--ybo"
+    },
+    {
+      "email": "fuboneason@gmail.com",
+      "password": "123456",
+      "id": "iaj22LtPEb0"
+    }
+  ],
+  "register": [
+    {
+      "name": "陳JJ",
+      "email": "arx827@gmail.com",
+      "password": "yji3vm06",
+      "id": "8JE5zfzL8_o"
+    }
+  ],
   "$schema": "./node_modules/json-server/schema.json"
 }

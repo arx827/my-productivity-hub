@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-import { HomeIcon, ListBulletIcon, DocumentTextIcon, Cog6ToothIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { HomeIcon, ListBulletIcon, DocumentTextIcon, Cog6ToothIcon, Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
 import { Transition } from '@headlessui/react';
+import { useAuthStore } from '../store/authStore'; // 引入 Zustand store
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,6 +10,9 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
+  const user = useAuthStore((state) => state.user);
 
   const navigation = [
     { name: '儀表板', href: '/', icon: HomeIcon },
@@ -16,6 +20,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: '筆記', href: '/notes', icon: DocumentTextIcon },
     { name: '設定', href: '/settings', icon: Cog6ToothIcon },
   ];
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
@@ -78,6 +87,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     ))}
                   </ul>
                 </li>
+                <li className="mt-auto">
+                  <button
+                    onClick={handleLogout}
+                    className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-300 hover:bg-gray-800 hover:text-white w-full text-left"
+                  >
+                    <ArrowLeftOnRectangleIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
+                    登出
+                  </button>
+                </li>
               </ul>
             </nav>
           </div>
@@ -124,8 +142,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     alt=""
                   />
                   <span className="sr-only">Your profile</span>
-                  <span>Alex Johnson</span>
+                  <span>{user?.name || 'Guest'}</span>
                 </div>
+                <button
+                  onClick={handleLogout}
+                  className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-300 hover:bg-gray-800 hover:text-white w-full text-left"
+                >
+                  <ArrowLeftOnRectangleIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
+                  登出
+                </button>
               </li>
             </ul>
           </nav>
@@ -147,7 +172,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </div>
         <main className="flex-1 py-6">
-          <div className="px-4 sm:px-6 lg:px-8">
+          <div className="px-4 sm:px-6 lg:px-8 h-full">
             {children}
           </div>
         </main>
